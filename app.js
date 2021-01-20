@@ -1,12 +1,18 @@
 const express = require('express');
+const morgan = require('morgan');
 const path = require('path');
+const cookieParser = require('cookie-parser');
 const app = express();	// app 변수에 모듈 할당
 												// app이 서버의 역할을 할 수 있음(모듈 내에 http 모듈 내장
 
 //app.set(express를 사용할 때 전역적으로 사용되는 속성 설정)
 // port를 따로 수정하지 않으면 port는 3000
 app.set('port', process.env.PORT || 3000);
-
+app.use(morgan('dev'));
+// app.use(morgan('combined')); // 사용자 ip, 브라우저 등 세세한 정보 알려줌, 배포할 때 주로 사용
+app.use(cookieParser());
+app.use(express.json());
+app.use(express.urlencoded({extended:true})); // true면 qs, flase면 query string
 // 미들웨어: 라우터 실행 전 객체 전송?
 // .use 미들웨어는 매개변수 3개
 app.use((req, res, next) => {	// 경로를 추가하면 해당 경로만 미들웨어 실행
@@ -32,6 +38,13 @@ app.use((req, res, next) => {	// 경로를 추가하면 해당 경로만 미들�
 // '/' 경로로 가야 실행되므로 app.use() 다음에 실행 되지 않음
 // app.get(주소, 라우터)												
 app.get('/', (req, res) => {
+	req.cookies;
+	req.signedCookies;	// 암호화된 쿠키
+	res.cookie('name', encodeURIComponent(name), {
+		expires: new Date(),
+		httpOnly: true,
+		path: '/',
+	})
 	// 파일 전송
 	res.sendFile(path.join(__dirname,'./index.html'));
 });
